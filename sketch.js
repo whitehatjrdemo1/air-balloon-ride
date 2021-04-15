@@ -1,74 +1,46 @@
-var balloon,balloonImage1,balloonImage2;
-var database;
-var height;
-
+var ball;
+var position, database;
+var bgImage, backImage;
 function preload(){
-   bg =loadImage("Images/cityImage.png");
-   balloonImage1=loadAnimation("Images/HotAirBallon-01.png");
-   balloonImage2=loadAnimation("Images/HotAirBallon-01.png","Images/HotAirBallon-01.png",
-   "Images/HotAirBallon-01.png","Images/HotAirBallon-02.png","Images/HotAirBallon-02.png",
-   "Images/HotAirBallon-02.png","Images/HotAirBallon-03.png","Images/HotAirBallon-03.png","Images/HotAirBallon-03.png");
-  }
-
-//Function to set initial environment
-function setup() {
-  database=firebase.database();
-  createCanvas(1500,700);
-
-  balloon=createSprite(250,650,150,150);
-  balloon.addAnimation("hotAirBalloon",balloonImage1);
-  balloon.scale=0.5;
-
-  var balloonHeight=database.ref('balloon/height');
-  balloonHeight.on("value",readHeight, showError);
-  textSize(20); 
+    bgImage = loadImage("Hot Air Ballon-01.png");
+    hotImage = loadAnimation("Hot Air Ballon-02.png", "Hot Air Ballon-03.png", "Hot Air Ballon-04.png");
 }
 
-// function to display UI
-function draw() {
-  background(bg);
-
-  if(keyDown(LEFT_ARROW)){
-    updateHeight(-10,0);
-    balloon.addAnimation("hotAirBalloon",balloonImage2);
-  }
-  else if(keyDown(RIGHT_ARROW)){
-    updateHeight(10,0);
-    balloon.addAnimation("hotAirBalloon",balloonImage2);
-  }
-  else if(keyDown(UP_ARROW)){
-    updateHeight(0,-10);
-    balloon.addAnimation("hotAirBalloon",balloonImage2);
-    balloon.scale=balloon.scale -0.005;
-  }
-  else if(keyDown(DOWN_ARROW)){
-    updateHeight(0,+10);
-    balloon.addAnimation("hotAirBalloon",balloonImage2);
-    balloon.scale=balloon.scale+0.005;
-  }
-
-  drawSprites();
-  fill(0);
-  stroke("white");
-  textSize(25);
-  text("**Use arrow keys to move Hot Air Balloon!",40,40);
+function setup(){
+    createCanvas(1300, 880);
+    backImage = createSprite(50, 50, canvas.weidth, canvas.height);
+    backImage.addImage(bgImage);
+    database = firebase.database();
+    ball = createSprite(250,250,10,10);
+    ball.addAnimation("moving", hotImage);
+    var vanshika = database.ref('ball')
+    vanshika.on("value", aadi)
 }
 
-
-function updateHeight(x,y){
-  database.ref('balloon/height').set({
-    'x': height.x + x ,
-    'y': height.y + y
-  })
+function draw(){
+    if(keyDown(LEFT_ARROW)){
+        writePosition(-5,0);
+    }
+    else if(keyDown(RIGHT_ARROW)){
+        writePosition(5,0);
+    }
+    else if(keyDown(UP_ARROW)){
+        writePosition(0,-5);
+    }
+    else if(keyDown(DOWN_ARROW)){
+        writePosition(0,+5);
+    }
+    drawSprites();
 }
 
-function readHeight(data){
-  height = data.val();
-  console.log(height.x);
-  balloon.x = height.x;
-  balloon.y = height.y;
+function writePosition(x,y){
+    database.ref('ball').set({
+        'x':position.x+x, 
+        'y':position.y+y
+    })
 }
-
-function showError(){
-  console.log("Error in writing to the database");
+function aadi(data){
+    position = data.val()
+    ball.x = position.x
+    ball.y = position.y
 }
